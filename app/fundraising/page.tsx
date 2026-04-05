@@ -236,34 +236,36 @@ export default function FundraisingPage() {
             Every contribution — of any size — makes a direct impact on our ability to serve.
           </p>
 
-          {/* Donation options placeholder */}
+          {/* PayPal Donation */}
           <div
-            className="p-8 mb-8"
+            className="p-8 mb-8 flex flex-col items-center text-center"
             style={{
               background: "#0d0d0d",
               border: "1px solid rgba(139,0,0,0.3)",
             }}
           >
             <div
-              className="text-[0.6rem] tracking-[0.3em] uppercase mb-4"
+              className="text-[0.6rem] tracking-[0.3em] uppercase mb-6"
               style={{ color: "#8B0000", fontFamily: "var(--font-body)" }}
             >
-              Donation Methods
+              Secure Online Donation via PayPal
             </div>
-            <div className="flex flex-col gap-4 text-sm text-gray-300" style={{ fontFamily: "var(--font-body)" }}>
-              <div className="flex items-start gap-3">
-                <span style={{ color: "#8B0000" }}>→</span>
-                <span>Mail a check to: Villa Hills Fire Department, Villa Hills, IL</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <span style={{ color: "#8B0000" }}>→</span>
-                <span>Online donation portal — link coming soon</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <span style={{ color: "#8B0000" }}>→</span>
-                <span>Contact the department directly to arrange a donation</span>
-              </div>
-            </div>
+            <a
+              href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-fire"
+              style={{ fontSize: "1rem", padding: "1rem 2.5rem" }}
+            >
+              Donate Now
+              <svg viewBox="0 0 20 20" className="w-4 h-4 fill-current">
+                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </a>
+            <p className="mt-5 text-xs" style={{ fontFamily: "var(--font-body)", color: "#6b7280" }}>
+              You will be redirected to PayPal to complete your donation securely.
+            </p>
+          </div>
           </div>
 
           <Link href="/about" className="btn-outline">
