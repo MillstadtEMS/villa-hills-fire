@@ -103,7 +103,7 @@ export default function Nav() {
             );
           })}
           <a
-            href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+            href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-fire text-xs px-4 py-2"
@@ -164,7 +164,7 @@ export default function Nav() {
           })}
           <div className="pt-4">
             <a
-              href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+              href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-fire w-full text-center text-sm"

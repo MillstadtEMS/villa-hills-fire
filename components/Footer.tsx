@@ -61,7 +61,7 @@ export default function Footer() {
           </p>
           <div className="w-8 h-px mb-6" style={{ background: "#8B0000" }} />
           <a
-            href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+            href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-fire text-xs px-5 py-3"

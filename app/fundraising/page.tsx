@@ -251,7 +251,7 @@ export default function FundraisingPage() {
               Secure Online Purchase via PayPal
             </div>
             <a
-              href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
+              href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-fire"
