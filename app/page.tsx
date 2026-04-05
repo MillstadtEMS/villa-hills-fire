@@ -462,7 +462,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
+                href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#8B0000] font-bold tracking-wider uppercase text-sm transition-opacity hover:opacity-90 w-full sm:w-auto"

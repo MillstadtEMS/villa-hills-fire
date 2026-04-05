@@ -86,7 +86,7 @@ export default function FundraisingPage() {
                 </p>
               </div>
               <a
-                href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
+                href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-fire"
@@ -239,7 +239,7 @@ export default function FundraisingPage() {
           {/* PayPal options */}
           <div className="flex flex-col gap-4 mb-8">
             <a
-              href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
+              href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-fire w-full justify-center"
@@ -248,7 +248,7 @@ export default function FundraisingPage() {
               Donate Now — Any Amount
             </a>
             <a
-              href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+              href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline w-full justify-center"
