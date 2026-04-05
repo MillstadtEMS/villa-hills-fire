@@ -237,6 +237,13 @@ body {
 }
 
 /* ─── MOBILE UTILITIES ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Push page content above the bottom tab bar */
+  body {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 639px) {
   :root { --spacing-section: 3rem; }
 
