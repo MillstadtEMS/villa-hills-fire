@@ -82,14 +82,19 @@ export default function StatusBar() {
                 className="shrink-0 inline-block w-2 h-2 rounded-full bg-red-500"
                 style={{ animation: "pulse 1s ease-in-out infinite" }}
               />
-              <span className="text-red-400 font-bold">Active Call</span>
+              <span className="text-red-400 font-bold tracking-wider">ACTIVE CALL</span>
               {incident!.receivedAt && (
-                <span className="text-gray-400 hidden sm:inline">
-                  · {new Date(incident!.receivedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                <span className="text-gray-400 hidden sm:inline shrink-0">
+                  · {new Date(incident!.receivedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} {new Date(incident!.receivedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                </span>
+              )}
+              {incident!.type && (
+                <span className="text-white font-semibold hidden sm:inline shrink-0">
+                  · {incident!.type}
                 </span>
               )}
               {incident!.location && (
-                <span className="text-gray-300 hidden sm:inline truncate">
+                <span className="text-gray-300 hidden md:inline truncate">
                   · {incident!.location}
                 </span>
               )}

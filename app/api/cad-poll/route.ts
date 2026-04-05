@@ -83,7 +83,9 @@ export async function GET(req: Request) {
       `;
       if (existing.length > 0) continue;
 
-      const lines = msg.text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      // Search both subject line and body
+      const combined = msg.subject + "\n" + msg.text;
+      const lines = combined.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
 
       const extract = (keys: string[]): string | null => {
         for (const line of lines) {
@@ -96,11 +98,17 @@ export async function GET(req: Request) {
         return null;
       };
 
+      // Nature / call type — check subject first, then body
       const callType =
-        extract(["Call Type", "Type", "Incident Type", "Nature", "Call"]) ??
+        extract(["Nature", "Call Type", "Incident Type", "Type", "Call"]) ??
         msg.subject.replace(/^(Dispatch|CAD|Alert|Inc):?\s*/i, "").trim();
 
-      const location = extract(["Address", "Location", "Incident Address", "Street", "Cross"]);
+      // Full address from body, then strip house number — only keep street name
+      const rawLocation = extract(["Address", "Location", "Incident Address", "Street", "Cross"]);
+      const location = rawLocation
+        ? rawLocation.replace(/^\d+[-\d]*\s+/, "").trim()  // strip leading house number
+        : null;
+
       const units = extract(["Units", "Unit", "Responding", "Apparatus", "Assigned"]);
 
       await sql`
