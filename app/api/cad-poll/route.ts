@@ -88,10 +88,9 @@ export async function GET(req: Request) {
       `;
       if (existing.length > 0) continue;
 
-      // Search both subject line and body
-      const combined = msg.subject + "\n" + msg.text;
-      const lines = combined.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const lines = msg.text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
 
+      // Try keyword extraction first
       const extract = (keys: string[]): string | null => {
         for (const line of lines) {
           for (const key of keys) {
@@ -103,18 +102,23 @@ export async function GET(req: Request) {
         return null;
       };
 
-      // Nature / call type — check subject first, then body
+      // Nature: try body keywords, fall back to subject line
       const callType =
-        extract(["Nature", "Call Type", "Incident Type", "Type", "Call"]) ??
-        msg.subject.replace(/^(Dispatch|CAD|Alert|Inc):?\s*/i, "").trim();
+        extract(["Nature", "Call Type", "Incident Type", "Type", "Call", "Incident"]) ??
+        msg.subject.replace(/^(Dispatch|CAD|Alert|Inc|Incident):?\s*/i, "").trim();
 
-      // Full address from body, then strip house number — only keep street name
-      const rawLocation = extract(["Address", "Location", "Incident Address", "Street", "Cross"]);
+      // Address: try keywords, then look for any line with a number + street pattern
+      const rawLocation =
+        extract(["Address", "Location", "Incident Address", "Street", "Cross", "Addr"]) ??
+        lines.find((l) => /^\d+\s+[A-Za-z]/.test(l)) ??
+        null;
+
+      // Strip house number — show street name only
       const location = rawLocation
-        ? rawLocation.replace(/^\d+[-\d]*\s+/, "").trim()  // strip leading house number
+        ? rawLocation.replace(/^\d+[-\w]*\s+/, "").replace(/,.*$/, "").trim()
         : null;
 
-      const units = extract(["Units", "Unit", "Responding", "Apparatus", "Assigned"]);
+      const units = extract(["Units", "Unit", "Responding", "Apparatus", "Assigned", "Resources"]);
 
       await sql`
         INSERT INTO incidents (received_at, call_type, location, units, raw_subject, raw_body)
