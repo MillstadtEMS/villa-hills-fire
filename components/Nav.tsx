@@ -9,10 +9,9 @@ const NAV_LINKS = [
   { href: "/",            label: "Home" },
   { href: "/about",       label: "About" },
   { href: "/apparatus",   label: "Apparatus" },
-  { href: "/members",     label: "Active Members" },
+  { href: "/members",     label: "Membership" },
   { href: "/fundraising", label: "Fundraising" },
   { href: "/join",        label: "Join the Team" },
-  { href: "/apply",       label: "Apply Now" },
 ] as const;
 
 export default function Nav() {
@@ -106,8 +105,17 @@ export default function Nav() {
               href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-fire text-xs px-4 py-2"
-              style={{ fontFamily: "var(--font-display)", letterSpacing: "0.12em" }}
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#8B0000",
+                transition: "color 0.2s ease",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#cc0000")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#8B0000")}
             >
               Donate Now
             </a>

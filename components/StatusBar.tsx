@@ -9,10 +9,54 @@ interface Incident {
   receivedAt?: string;
 }
 
+type FireLevel = "normal" | "elevated" | "critical";
+
+interface FireWeather {
+  level: FireLevel;
+  label: string;
+}
+
+async function fetchFireWeather(): Promise<FireWeather> {
+  try {
+    const res = await fetch(
+      "https://api.weather.gov/alerts/active?zone=ILC163",
+      {
+        headers: {
+          "User-Agent": "(villahillsfd.org, villahillsfd@gmail.com)",
+          Accept: "application/geo+json",
+        },
+        cache: "no-store",
+      }
+    );
+    const data = await res.json();
+    const alerts: { properties: { event: string } }[] = data.features ?? [];
+
+    for (const alert of alerts) {
+      const ev = alert.properties.event.toLowerCase();
+      if (ev.includes("red flag")) {
+        return { level: "critical", label: "RED FLAG WARNING" };
+      }
+    }
+    for (const alert of alerts) {
+      const ev = alert.properties.event.toLowerCase();
+      if (ev.includes("fire weather watch")) {
+        return { level: "elevated", label: "FIRE WEATHER WATCH" };
+      }
+      if (ev.includes("fire weather")) {
+        return { level: "elevated", label: "FIRE WEATHER ADVISORY" };
+      }
+    }
+  } catch {
+    // fail silently
+  }
+  return { level: "normal", label: "" };
+}
+
 export default function StatusBar() {
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
   const [incident, setIncident] = useState<Incident | null>(null);
+  const [fire, setFire] = useState<FireWeather>({ level: "normal", label: "" });
 
   // Clock
   useEffect(() => {
@@ -42,7 +86,7 @@ export default function StatusBar() {
     return () => clearInterval(id);
   }, []);
 
-  // CAD polling — every 30 seconds
+  // CAD polling
   useEffect(() => {
     const fetchCAD = async () => {
       try {
@@ -50,16 +94,29 @@ export default function StatusBar() {
         const data = await res.json();
         setIncident(data.incident ?? null);
       } catch {
-        // silently fail — don't break the UI
+        // silently fail
       }
     };
-
     fetchCAD();
     const id = setInterval(fetchCAD, 60_000);
     return () => clearInterval(id);
   }, []);
 
+  // Fire weather polling — every 10 minutes
+  useEffect(() => {
+    fetchFireWeather().then(setFire);
+    const id = setInterval(() => fetchFireWeather().then(setFire), 10 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const isActive = !!incident;
+
+  const fireDot =
+    fire.level === "critical"
+      ? "#ff4400"
+      : fire.level === "elevated"
+      ? "#f59e0b"
+      : null;
 
   return (
     <div
@@ -74,7 +131,7 @@ export default function StatusBar() {
     >
       <div className="wrap w-full flex items-center justify-between gap-4 text-[0.65rem] font-mono tracking-widest uppercase">
 
-        {/* LEFT — operational status */}
+        {/* LEFT — CAD status */}
         <div className="flex items-center gap-3 shrink-0 min-w-0">
           {isActive ? (
             <>
@@ -85,7 +142,8 @@ export default function StatusBar() {
               <span className="text-red-400 font-bold tracking-wider">ACTIVE CALL</span>
               {incident!.receivedAt && (
                 <span className="text-gray-400 hidden sm:inline shrink-0">
-                  · {new Date(incident!.receivedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} {new Date(incident!.receivedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                  · {new Date(incident!.receivedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}{" "}
+                  {new Date(incident!.receivedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </span>
               )}
               {incident!.type && (
@@ -109,13 +167,24 @@ export default function StatusBar() {
           )}
         </div>
 
-        {/* CENTER — dept name */}
-        <div
-          className="hidden md:block text-center shrink-0"
-          style={{ color: "rgba(139,0,0,0.7)", letterSpacing: "0.3em" }}
-        >
-          Villa Hills Fire Department
-        </div>
+        {/* CENTER — fire weather (only when elevated or critical) */}
+        {fire.level !== "normal" && (
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+              style={{
+                background: fireDot!,
+                animation: fire.level === "critical" ? "pulse 0.8s ease-in-out infinite" : "none",
+              }}
+            />
+            <span
+              className="font-bold tracking-wider"
+              style={{ color: fireDot! }}
+            >
+              {fire.label}
+            </span>
+          </div>
+        )}
 
         {/* RIGHT — clock */}
         <div className="flex items-center gap-4 shrink-0 text-gray-600">
