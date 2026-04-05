@@ -167,24 +167,24 @@ export default function StatusBar() {
           )}
         </div>
 
-        {/* CENTER — fire weather (only when elevated or critical) */}
-        {fire.level !== "normal" && (
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
-            <span
-              className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-              style={{
-                background: fireDot!,
-                animation: fire.level === "critical" ? "pulse 0.8s ease-in-out infinite" : "none",
-              }}
-            />
-            <span
-              className="font-bold tracking-wider"
-              style={{ color: fireDot! }}
-            >
-              {fire.label}
-            </span>
-          </div>
-        )}
+        {/* CENTER — fire weather */}
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+            style={{
+              background: fire.level === "critical" ? "#ff4400" : fire.level === "elevated" ? "#f59e0b" : "#22c55e",
+              animation: fire.level === "critical" ? "pulse 0.8s ease-in-out infinite" : "none",
+            }}
+          />
+          <span
+            className="font-bold tracking-wider"
+            style={{
+              color: fire.level === "critical" ? "#ff4400" : fire.level === "elevated" ? "#f59e0b" : "#16a34a",
+            }}
+          >
+            {fire.level === "normal" ? "No Fire Hazards" : fire.label}
+          </span>
+        </div>
 
         {/* RIGHT — clock */}
         <div className="flex items-center gap-4 shrink-0 text-gray-600">
