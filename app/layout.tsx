@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import StatusBar from "@/components/StatusBar";
 import FireTruckAnimation from "@/components/FireTruckAnimation";
 import HolidayOverlay from "@/components/HolidayOverlay";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -36,8 +37,15 @@ export const metadata: Metadata = {
     "Villa Hills Fire Department — Dedicated & Proud, serving St. Clair County, Illinois since 1955. Emergency response, fire suppression, and community protection.",
   keywords: ["fire department", "Villa Hills", "St. Clair County", "Illinois", "emergency services", "fire protection"],
   icons: {
-    icon: "/images/badge.png",
-    apple: "/images/badge.png",
+    icon: "/icon-192.png",
+    apple: "/apple-touch-icon.png",
+    shortcut: "/icon-192.png",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "VHFD",
   },
 };
 
@@ -57,6 +65,7 @@ export default function RootLayout({
         <Footer />
         <FireTruckAnimation />
         <HolidayOverlay />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

@@ -1,0 +1,41 @@
+{
+  "name": "Villa Hills Fire Department",
+  "short_name": "VHFD",
+  "description": "Villa Hills Fire Protection District — Dedicated & Proud. Serving St. Clair County, Illinois since 1955.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#8B0000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Active Members",
+      "url": "/members",
+      "description": "View active roster"
+    },
+    {
+      "name": "Join the Team",
+      "url": "/join",
+      "description": "Become a volunteer"
+    },
+    {
+      "name": "Apparatus",
+      "url": "/apparatus",
+      "description": "View fleet"
+    }
+  ]
+}
