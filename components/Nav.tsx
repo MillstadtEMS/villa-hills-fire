@@ -41,7 +41,7 @@ export default function Nav() {
             : "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        <div className="wrap h-full flex items-center justify-between gap-8">
+        <div className="wrap h-full flex items-center gap-8">
 
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
@@ -71,7 +71,7 @@ export default function Nav() {
           </Link>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center gap-7">
+          <nav className="hidden md:flex items-center gap-7 flex-1 justify-center">
             {NAV_LINKS.map(({ href, label }) => {
               const active = pathname === href;
               return (
