@@ -146,7 +146,7 @@ export default function AboutPage() {
         }}
       >
         <div className="wrap flex flex-col items-center text-center">
-          <div className="relative shrink-0" style={{ width: "min(672px, 90vw)", height: "min(672px, 90vw)", marginBottom: "clamp(-60px, -15vw, -180px)" }}>
+          <div className="relative shrink-0" style={{ width: "min(672px, 90vw)", height: "min(672px, 90vw)", marginBottom: "clamp(-100px, -22vw, -300px)" }}>
             <Image
               src="/images/badge.png"
               alt="Villa Hills Fire Department Badge"
@@ -155,7 +155,21 @@ export default function AboutPage() {
               className="object-contain"
             />
           </div>
-          <p className="section-label mb-4">Our Identity</p>
+          {/* "Our Identity" — no dash, centered above heading */}
+          <p
+            className="mb-3"
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: "#8B0000",
+              textAlign: "center",
+            }}
+          >
+            Our Identity
+          </p>
           <h2 className="heading-lg mb-6">
             <span style={{ color: "#8B0000" }}>Dedicated</span><br />
             &amp; Proud
