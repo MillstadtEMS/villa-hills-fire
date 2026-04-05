@@ -214,7 +214,7 @@ export default function MembersPage() {
                 </p>
                 <p>
                   Pending approval by the VHFD board of directors, all successful applicants will be placed
-                  on a mandatory <strong className="text-white">six (6) month probationary period</strong> during
+                  on a mandatory <strong className="text-white">one (1) year probationary period</strong> during
                   which the candidate is required to attend <strong className="text-white">all</strong> scheduled
                   meetings and training sessions.
                 </p>

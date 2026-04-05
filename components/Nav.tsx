@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/apparatus",   label: "Apparatus" },
   { href: "/members",     label: "Membership" },
   { href: "/fundraising", label: "Fundraising" },
+  { href: "/raffle",      label: "Raffle" },
   { href: "/join",        label: "Join the Team" },
 ] as const;
 

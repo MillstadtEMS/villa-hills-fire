@@ -1,4 +1,4 @@
-const CACHE = "vhfd-v4";
+const CACHE = "vhfd-v5";
 const STATIC = [
   "/",
   "/about",
@@ -6,6 +6,7 @@ const STATIC = [
   "/members",
   "/join",
   "/fundraising",
+  "/raffle",
   "/apply",
   "/manifest.json",
   "/icon-192.png",
