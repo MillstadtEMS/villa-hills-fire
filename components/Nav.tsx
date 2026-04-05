@@ -41,95 +41,52 @@ export default function Nav() {
             : "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        <div className="wrap h-full flex items-center gap-8">
-
-          {/* LOGO */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:translate-x-0">
-            <div className="relative w-[80px] h-[80px] md:w-[70px] md:h-[70px]">
-              <Image
-                src="/images/badge.png"
-                alt="Villa Hills Fire Department Badge"
-                fill
-                sizes="80px"
-                className="object-contain"
-              />
-            </div>
-            <div className="hidden sm:block">
-              <div
-                className="font-display text-white uppercase leading-none"
-                style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "0.12em", fontSize: "1.05rem" }}
-              >
-                Villa Hills
-              </div>
-              <div
-                className="tracking-[0.3em] uppercase leading-none mt-1"
-                style={{ color: "#8B0000", fontSize: "0.72rem" }}
-              >
-                Fire Department
-              </div>
-            </div>
-          </Link>
-
-          {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center gap-7 flex-1 justify-center">
-            {NAV_LINKS.map(({ href, label }) => {
-              const active = pathname === href;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className="relative text-[0.7rem] tracking-[0.18em] uppercase font-semibold transition-colors duration-200"
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    color: active ? "#ffffff" : "#9ca3af",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) (e.currentTarget as HTMLElement).style.color = "#ffffff";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) (e.currentTarget as HTMLElement).style.color = "#9ca3af";
-                  }}
-                >
-                  {label}
-                  {active && (
-                    <span
-                      className="absolute -bottom-0.5 left-0 right-0 h-px"
-                      style={{ background: "#8B0000" }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
-            <a
-              href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "0.7rem",
-                fontWeight: 700,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#8B0000",
-                transition: "color 0.2s ease",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#cc0000")}
-              onMouseLeave={e => (e.currentTarget.style.color = "#8B0000")}
-            >
-              Donate Now
-            </a>
-          </nav>
-
-          {/* MOBILE — "More" label replaces hamburger, bottom bar handles navigation */}
-          <button
-            className="md:hidden flex flex-col items-center gap-[3px]"
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle menu"
-          >
+        {/* ── MOBILE: 3-col grid = hamburger | centered logo | spacer ── */}
+        <div className="md:hidden wrap h-full grid items-center" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
+          <button onClick={() => setOpen(!open)} aria-label="Toggle menu" className="justify-self-start">
             <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white" aria-hidden>
               <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
             </svg>
           </button>
+          <Link href="/" className="flex justify-center">
+            <div className="relative w-[86px] h-[86px]">
+              <Image src="/images/badge.png" alt="Villa Hills Fire Department Badge" fill sizes="86px" className="object-contain" />
+            </div>
+          </Link>
+          <div /> {/* right spacer */}
+        </div>
+
+        {/* ── DESKTOP ── */}
+        <div className="hidden md:flex wrap h-full items-center gap-8">
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            <div className="relative w-[70px] h-[70px]">
+              <Image src="/images/badge.png" alt="Villa Hills Fire Department Badge" fill sizes="70px" className="object-contain" />
+            </div>
+            <div>
+              <div className="font-display text-white uppercase leading-none" style={{ fontFamily: "var(--font-display)", fontWeight: 700, letterSpacing: "0.12em", fontSize: "1.05rem" }}>Villa Hills</div>
+              <div className="tracking-[0.3em] uppercase leading-none mt-1" style={{ color: "#8B0000", fontSize: "0.72rem" }}>Fire Department</div>
+            </div>
+          </Link>
+          <nav className="flex items-center gap-7 flex-1 justify-center">
+            {NAV_LINKS.map(({ href, label }) => {
+              const active = pathname === href;
+              return (
+                <Link key={href} href={href} className="relative text-[0.7rem] tracking-[0.18em] uppercase font-semibold transition-colors duration-200"
+                  style={{ fontFamily: "var(--font-body)", color: active ? "#ffffff" : "#9ca3af" }}
+                  onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = "#ffffff"; }}
+                  onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.color = "#9ca3af"; }}
+                >
+                  {label}
+                  {active && <span className="absolute -bottom-0.5 left-0 right-0 h-px" style={{ background: "#8B0000" }} />}
+                </Link>
+              );
+            })}
+            <a href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4" target="_blank" rel="noopener noreferrer"
+              style={{ fontFamily: "var(--font-display)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8B0000", transition: "color 0.2s ease" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#cc0000")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#8B0000")}
+            >Donate Now</a>
+          </nav>
         </div>
 
         {/* MOBILE FULL MENU — slides down from header */}

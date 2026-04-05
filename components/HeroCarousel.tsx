@@ -70,29 +70,6 @@ export default function HeroCarousel() {
         />
       ))}
 
-      {/* Dot indicators */}
-      <div
-        className="absolute bottom-[13rem] sm:bottom-40 left-1/2 -translate-x-1/2 flex gap-2 z-20"
-        aria-label="Carousel navigation"
-      >
-        {SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            aria-label={`Go to slide ${i + 1}`}
-            className="transition-all duration-300"
-            style={{
-              width: i === current ? "1.75rem" : "0.5rem",
-              height: "0.5rem",
-              borderRadius: "9999px",
-              background: i === current ? "#8B0000" : "rgba(255,255,255,0.3)",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-            }}
-          />
-        ))}
-      </div>
     </>
   );
 }
