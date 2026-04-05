@@ -52,7 +52,7 @@ export async function GET(req: Request) {
     await client.mailboxOpen("INBOX");
 
     // Fetch last 10 messages
-    const messages: { subject: string; text: string; date: Date }[] = [];
+    const messages: { subject: string; text: string; date: Date; from: string }[] = [];
 
     // Only fetch the 5 most recent messages by UID
     const status = await client.status("INBOX", { messages: true });
@@ -63,10 +63,14 @@ export async function GET(req: Request) {
     for await (const msg of client.fetch(range, { envelope: true, source: true })) {
       if (!msg.source) continue;
       const parsed = await simpleParser(msg.source);
+      const fromAddr = Array.isArray(parsed.from?.value)
+        ? parsed.from.value.map((a: { address?: string }) => a.address ?? "").join(",")
+        : "";
       messages.push({
         subject: parsed.subject ?? "",
         text: parsed.text ?? "",
         date: parsed.date ?? new Date(0),
+        from: fromAddr,
       });
     }
 
@@ -76,9 +80,11 @@ export async function GET(req: Request) {
       return NextResponse.json({ stored: 0 });
     }
 
-    // Sort newest first
+    // Sort newest first, only process emails from Chief 360
     messages.sort((a, b) => b.date.getTime() - a.date.getTime());
-    const recent = messages.slice(0, 5);
+    const recent = messages
+      .filter(m => m.from?.toLowerCase().includes("alert@cfmsg.co"))
+      .slice(0, 5);
 
     let stored = 0;
     for (const msg of recent) {
@@ -88,37 +94,33 @@ export async function GET(req: Request) {
       `;
       if (existing.length > 0) continue;
 
-      const lines = msg.text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      // ── Chief 360 format (alert@cfmsg.co) ──
+      // Subject: [39 VH CAD] CALL TYPE -- 123 Street Name CITY, IL ZIP -- Box: ... -- Units: ...
+      // Everything we need is in the subject line.
 
-      // Try keyword extraction first
-      const extract = (keys: string[]): string | null => {
-        for (const line of lines) {
-          for (const key of keys) {
-            const re = new RegExp(`^${key}[:\\s]+(.+)$`, "i");
-            const m = line.match(re);
-            if (m) return m[1].trim();
-          }
-        }
-        return null;
-      };
+      const subject = msg.subject;
 
-      // Nature: try body keywords, fall back to subject line
-      const callType =
-        extract(["Nature", "Call Type", "Incident Type", "Type", "Call", "Incident"]) ??
-        msg.subject.replace(/^(Dispatch|CAD|Alert|Inc|Incident):?\s*/i, "").trim();
+      // Parse call type — between "] " and first " --"
+      const callTypeRaw = subject.match(/\]\s+(.+?)\s+--/)?.[1]?.trim() ?? null;
 
-      // Address: try keywords, then look for any line with a number + street pattern
-      const rawLocation =
-        extract(["Address", "Location", "Incident Address", "Street", "Cross", "Addr"]) ??
-        lines.find((l) => /^\d+\s+[A-Za-z]/.test(l)) ??
-        null;
+      // Check body for CAD notes that override call type (e.g. "Fully Involved Structure Fire")
+      const bodyLines = msg.text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const noteMatch = bodyLines.find(l =>
+        /note|comment|remark|description/i.test(l) ||
+        /fully involved|working fire|entrap|unconscious|not breathing|cardiac/i.test(l)
+      );
+      const callType = noteMatch
+        ? noteMatch.replace(/^(note|comment|remark)[:\s]*/i, "").trim()
+        : (callTypeRaw ?? subject.trim());
 
-      // Strip house number — show street name only
-      const location = rawLocation
-        ? rawLocation.replace(/^\d+[-\w]*\s+/, "").replace(/,.*$/, "").trim()
+      // Parse address — between first and second " --", then strip house number
+      const addressRaw = subject.match(/--\s+(.+?)\s+--/)?.[1]?.trim() ?? null;
+      // Strip house number (leading digits), strip city/state/zip after comma
+      const location = addressRaw
+        ? addressRaw.replace(/^\d+[-\w]*\s+/, "").replace(/,.*$/, "").trim()
         : null;
 
-      const units = extract(["Units", "Unit", "Responding", "Apparatus", "Assigned", "Resources"]);
+      const units = null; // not displayed per requirements
 
       await sql`
         INSERT INTO incidents (received_at, call_type, location, units, raw_subject, raw_body)
