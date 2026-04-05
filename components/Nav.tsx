@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { href: "/apparatus",   label: "Apparatus" },
   { href: "/members",     label: "Membership" },
   { href: "/fundraising", label: "Fundraising" },
-  { href: "/join",        label: "Join" },
+  { href: "/join",        label: "Join the Team" },
 ] as const;
 
 export default function Nav() {
