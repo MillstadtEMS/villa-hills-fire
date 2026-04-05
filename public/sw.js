@@ -1,4 +1,4 @@
-const CACHE = "vhfd-v1";
+const CACHE = "vhfd-v2";
 const STATIC = [
   "/",
   "/about",
