@@ -75,7 +75,7 @@ export default function AboutPage() {
             </p>
             <p>
               We train continuously. We invest in equipment. We show up — for fires, for
-              accidents, for hazardous materials, for medical emergencies, and for the
+              accidents, for mutual aid response, for medical emergencies, and for the
               community events that make Villa Hills home.
             </p>
           </div>

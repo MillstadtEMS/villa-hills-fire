@@ -190,7 +190,7 @@ export default function Home() {
                   raise families here, and have chosen to stand between danger and the people they love.
                 </p>
                 <p>
-                  From structure fires to vehicle accidents, hazmat response to community education —
+                  From structure fires to vehicle accidents, mutual aid response to community education —
                   Villa Hills Fire Department is ready.
                 </p>
               </div>
