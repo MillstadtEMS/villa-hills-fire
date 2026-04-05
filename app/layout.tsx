@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import StatusBar from "@/components/StatusBar";
 import FireTruckAnimation from "@/components/FireTruckAnimation";
+import HolidayOverlay from "@/components/HolidayOverlay";
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -51,6 +52,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <FireTruckAnimation />
+        <HolidayOverlay />
       </body>
     </html>
   );
