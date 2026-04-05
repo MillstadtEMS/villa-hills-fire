@@ -224,6 +224,18 @@ body {
 }
 .footer-link:hover { color: #ffffff; }
 
+/* ─── HERO CONTENT ───────────────────────────────────────────────── */
+/* Desktop: enough padding to clear stats strip (1-row, ~5rem) + dots */
+.hero-content {
+  padding-bottom: clamp(6rem, 12vw, 10rem);
+}
+/* Mobile: stats strip is 2-row grid (~10rem tall). Need more clearance. */
+@media (max-width: 767px) {
+  .hero-content {
+    padding-bottom: 13rem;
+  }
+}
+
 /* ─── MOBILE UTILITIES ───────────────────────────────────────────── */
 @media (max-width: 639px) {
   :root { --spacing-section: 3rem; }
@@ -234,6 +246,13 @@ body {
 
   .heading-xl {
     font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+
+  /* Full-width buttons on small screens */
+  .btn-fire,
+  .btn-outline {
+    width: 100%;
+    justify-content: center;
   }
 }
 

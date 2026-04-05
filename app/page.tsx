@@ -28,8 +28,8 @@ export default function Home() {
 
         {/* Content */}
         <div
-          className="relative z-10 wrap"
-          style={{ paddingTop: "calc(2.5rem + 3.5rem + clamp(2rem, 6vw, 4rem))", paddingBottom: "clamp(6rem, 12vw, 10rem)" }}
+          className="relative z-10 wrap hero-content"
+          style={{ paddingTop: "calc(2.5rem + 3.5rem + clamp(2rem, 6vw, 4rem))" }}
         >
           {/* Eyebrow */}
           <div className="flex items-center gap-3 mb-8 fade-up">
@@ -101,14 +101,14 @@ export default function Home() {
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-wrap gap-4 fade-up-4">
-            <Link href="/members" className="btn-fire">
+          <div className="flex flex-col sm:flex-row gap-4 fade-up-4">
+            <Link href="/members" className="btn-fire w-full sm:w-auto justify-center">
               View Active Members
               <svg viewBox="0 0 20 20" className="w-4 h-4 fill-current">
                 <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </Link>
-            <Link href="/fundraising" className="btn-outline">
+            <Link href="/fundraising" className="btn-outline w-full sm:w-auto justify-center">
               Support Our Department
             </Link>
           </div>
@@ -122,19 +122,19 @@ export default function Home() {
             borderTop: "1px solid rgba(139,0,0,0.25)",
           }}
         >
-          <div className="wrap py-6 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
+          <div className="wrap py-4 sm:py-6 grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
             {[
-              { value: "1955",      label: "Established",      sub: "" },
-              { value: "70th",      label: "Anniversary",      sub: "" },
-              { value: "24/7",     label: "Emergency Response", sub: "" },
-              { value: "Villa Hills", label: "District",          sub: "" },
+              { value: "1955",        label: "Established",       sub: "" },
+              { value: "70th",        label: "Anniversary",       sub: "" },
+              { value: "24/7",        label: "Emergency Response", sub: "" },
+              { value: "Villa Hills", label: "District",           sub: "" },
             ].map((stat) => (
-              <div key={stat.label} className="text-center px-4 py-1">
+              <div key={stat.label} className="text-center px-2 sm:px-4 py-1">
                 <div
                   className="font-display text-white leading-none mb-1"
                   style={{
                     fontFamily: "var(--font-display)",
-                    fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+                    fontSize: "clamp(1.2rem, 4vw, 2.2rem)",
                     fontWeight: 700,
                     color: "#8B0000",
                   }}
@@ -142,8 +142,8 @@ export default function Home() {
                   {stat.value}
                 </div>
                 <div
-                  className="text-white text-xs font-semibold tracking-widest uppercase"
-                  style={{ fontFamily: "var(--font-body)" }}
+                  className="text-white font-semibold tracking-widest uppercase"
+                  style={{ fontFamily: "var(--font-body)", fontSize: "clamp(0.55rem, 1.8vw, 0.75rem)" }}
                 >
                   {stat.label}
                 </div>
@@ -252,18 +252,25 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center gap-0">
 
             {/* 70 Years artwork */}
-            <div className="relative shrink-0 w-full md:w-auto" style={{ height: "min(80vw, 500px)", width: "min(80vw, 500px)", marginLeft: "clamp(-2rem, -5vw, -120px)" }}>
+            <div
+              className="relative shrink-0 mx-auto md:mx-0"
+              style={{
+                height: "min(70vw, 420px)",
+                width: "min(70vw, 420px)",
+                marginLeft: "clamp(-1rem, -3vw, -80px)",
+              }}
+            >
               <Image
                 src="/images/70th-anniversary.png"
                 alt="Villa Hills Fire Department 70th Anniversary"
                 fill
-                sizes="(max-width: 768px) 80vw, 500px"
+                sizes="(max-width: 768px) 70vw, 420px"
                 className="object-contain"
               />
             </div>
 
             {/* Text */}
-            <div className="text-center md:text-left pb-8 md:pb-0" style={{ marginLeft: "clamp(0rem, 2vw, 2rem)" }}>
+            <div className="text-center md:text-left pb-6 md:pb-0" style={{ marginLeft: "clamp(0rem, 2vw, 2rem)" }}>
               <p className="section-label mb-4 justify-center md:justify-start">Milestone</p>
               <h2
                 className="font-display text-white uppercase mb-4"
@@ -453,13 +460,13 @@ export default function Home() {
               equipment, training, and the operational needs that keep your neighbors
               safe — every shift, every call.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <a
                 href="https://www.paypal.com/ncp/payment/YFDSAQ6GNCCS4"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#8B0000] font-bold tracking-wider uppercase text-sm transition-opacity hover:opacity-90"
-                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", minHeight: "48px" }}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#8B0000] font-bold tracking-wider uppercase text-sm transition-opacity hover:opacity-90 w-full sm:w-auto"
+                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", minHeight: "52px" }}
               >
                 Donate Now
                 <svg viewBox="0 0 20 20" className="w-4 h-4 fill-current">
@@ -468,8 +475,8 @@ export default function Home() {
               </a>
               <Link
                 href="/about"
-                className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold tracking-wider uppercase text-sm border border-white/30 hover:border-white/70 transition-colors"
-                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", minHeight: "48px" }}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 text-white font-bold tracking-wider uppercase text-sm border border-white/30 hover:border-white/70 transition-colors w-full sm:w-auto"
+                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", minHeight: "52px" }}
               >
                 Learn How It Helps
               </Link>
@@ -577,8 +584,8 @@ export default function Home() {
           paddingBottom: "2.5rem",
         }}
       >
-        <div className="wrap flex flex-col sm:flex-row items-center justify-between gap-8">
-          <div>
+        <div className="wrap flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="text-center sm:text-left">
             <h3
               className="font-display text-white uppercase text-2xl mb-1"
               style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}
@@ -589,8 +596,8 @@ export default function Home() {
               Villa Hills Fire Department is always looking for dedicated members.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4">
-            <Link href="/apply" className="btn-fire">Apply Now</Link>
+          <div className="flex w-full sm:w-auto">
+            <Link href="/apply" className="btn-fire w-full sm:w-auto">Apply Now</Link>
           </div>
         </div>
       </section>

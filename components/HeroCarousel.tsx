@@ -72,7 +72,7 @@ export default function HeroCarousel() {
 
       {/* Dot indicators */}
       <div
-        className="absolute bottom-36 left-1/2 -translate-x-1/2 flex gap-2 z-20"
+        className="absolute bottom-[13rem] sm:bottom-40 left-1/2 -translate-x-1/2 flex gap-2 z-20"
         aria-label="Carousel navigation"
       >
         {SLIDES.map((_, i) => (

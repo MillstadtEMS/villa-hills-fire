@@ -36,11 +36,6 @@ export const metadata: Metadata = {
   description:
     "Villa Hills Fire Department — Dedicated & Proud, serving St. Clair County, Illinois since 1955. Emergency response, fire suppression, and community protection.",
   keywords: ["fire department", "Villa Hills", "St. Clair County", "Illinois", "emergency services", "fire protection"],
-  icons: {
-    icon: "/icon-192.png",
-    apple: "/apple-touch-icon.png",
-    shortcut: "/icon-192.png",
-  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
