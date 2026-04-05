@@ -319,8 +319,8 @@ export default function Home() {
             <div>
               <p className="section-label mb-4">Fleet</p>
               <h2 className="heading-lg">
-                Apparatus &amp;<br />
-                <span style={{ color: "#8B0000" }}>Response</span>
+                Our<br />
+                <span style={{ color: "#8B0000" }}>Apparatus</span>
               </h2>
             </div>
             <div className="relative w-full max-w-xs sm:max-w-sm">
