@@ -49,8 +49,8 @@ export default function Nav() {
             </svg>
           </button>
           <Link href="/" className="flex justify-center">
-            <div className="relative w-[86px] h-[86px]">
-              <Image src="/images/badge.png" alt="Villa Hills Fire Department Badge" fill sizes="86px" className="object-contain" />
+            <div className="relative w-[48px] h-[48px]">
+              <Image src="/images/badge.png" alt="Villa Hills Fire Department Badge" fill sizes="48px" className="object-contain" />
             </div>
           </Link>
           <div /> {/* right spacer */}
