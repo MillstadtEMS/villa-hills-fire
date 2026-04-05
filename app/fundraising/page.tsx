@@ -134,7 +134,7 @@ export default function FundraisingPage() {
         </div>
       </section>
 
-      {/* WHERE IT GOES */}
+      {/* WHAT YOUR SUPPORT MAKES POSSIBLE */}
       <section
         style={{
           paddingTop: "var(--spacing-section)",
@@ -144,64 +144,70 @@ export default function FundraisingPage() {
         }}
       >
         <div className="wrap">
-          <p className="section-label mb-4">Allocation</p>
-          <h2 className="heading-lg mb-12">
-            Where Your<br />
-            <span style={{ color: "#8B0000" }}>Money Goes</span>
+          <p className="section-label mb-4">Fundraising Impact</p>
+          <h2 className="heading-lg mb-8">
+            What Your Support<br />
+            <span style={{ color: "#8B0000" }}>Makes Possible</span>
           </h2>
+          <p
+            className="mb-14 max-w-2xl"
+            style={{ fontFamily: "var(--font-body)", color: "#d1d5db", lineHeight: 1.8, fontSize: "0.95rem" }}
+          >
+            Villa Hills Fire Department is built on service, readiness, and community support.
+            Contributions help strengthen the tools, training, and operational readiness that allow
+            our volunteer members to answer the call when it matters most. Needs may shift over time,
+            but every dollar supports the mission of protecting life and property.
+          </p>
 
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px" style={{ background: "rgba(139,0,0,0.15)" }}>
             {[
               {
-                category: "Apparatus & Equipment",
-                pct: 40,
-                desc: "Trucks, hoses, tools, SCBA gear, and the high-cost equipment our firefighters need to do their job safely.",
+                title: "Equipment Readiness",
+                desc: "Maintenance, replacement, and support for the tools and apparatus used in emergency response.",
               },
               {
-                category: "Training & Certification",
-                pct: 25,
-                desc: "Continuous professional development — keeping every member current with the latest fire, rescue, and EMS techniques.",
+                title: "Member Training",
+                desc: "Continued training and preparedness for firefighting, rescue, and incident response.",
               },
               {
-                category: "Station Operations",
-                pct: 20,
-                desc: "Utilities, maintenance, and the day-to-day operational costs of keeping the station ready and functional.",
+                title: "Protective Gear",
+                desc: "Support for the equipment our firefighters depend on for safety and performance.",
               },
               {
-                category: "Community Programs",
-                pct: 15,
-                desc: "Fire prevention education, school visits, public safety events, and community engagement initiatives.",
+                title: "Operational Support",
+                desc: "Resources that help keep the station, response systems, and daily operations moving.",
               },
             ].map((item) => (
-              <div key={item.category} className="panel">
-                <div className="w-16 text-right shrink-0">
-                  <span
-                    className="font-display font-bold"
-                    style={{ fontFamily: "var(--font-display)", color: "#8B0000", fontSize: "1.4rem" }}
-                  >
-                    {item.pct}%
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div
-                    className="font-display text-white font-bold uppercase mb-1"
-                    style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}
-                  >
-                    {item.category}
-                  </div>
-                  <p className="text-xs text-gray-400" style={{ fontFamily: "var(--font-body)" }}>
-                    {item.desc}
-                  </p>
-                </div>
-                {/* Progress bar */}
-                <div className="w-24 hidden sm:block">
-                  <div className="h-1 bg-white/5 w-full">
-                    <div className="h-1" style={{ background: "#8B0000", width: `${item.pct}%` }} />
-                  </div>
-                </div>
+              <div
+                key={item.title}
+                className="p-10"
+                style={{ background: "#0A0A0A" }}
+              >
+                <div
+                  className="w-8 mb-6"
+                  style={{ height: "2px", background: "#8B0000" }}
+                />
+                <h3
+                  className="font-display text-white uppercase mb-4"
+                  style={{ fontFamily: "var(--font-display)", fontSize: "1.15rem", fontWeight: 700, letterSpacing: "0.05em" }}
+                >
+                  {item.title}
+                </h3>
+                <p
+                  style={{ fontFamily: "var(--font-body)", color: "#d1d5db", fontSize: "0.9rem", lineHeight: 1.75 }}
+                >
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
+
+          <p
+            className="mt-8 text-xs"
+            style={{ fontFamily: "var(--font-body)", color: "#374151" }}
+          >
+            Operational needs change over time based on department priorities and readiness needs.
+          </p>
         </div>
       </section>
 
