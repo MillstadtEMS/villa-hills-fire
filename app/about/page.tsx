@@ -146,7 +146,7 @@ export default function AboutPage() {
         }}
       >
         <div className="wrap flex flex-col items-center text-center">
-          <div className="relative shrink-0" style={{ width: "min(672px, 90vw)", height: "min(672px, 90vw)", marginBottom: "min(-18vw, -120px)" }}>
+          <div className="relative shrink-0" style={{ width: "min(672px, 90vw)", height: "min(672px, 90vw)", marginBottom: "clamp(-140px, -10vw, -60px)" }}>
             <Image
               src="/images/badge.png"
               alt="Villa Hills Fire Department Badge"
