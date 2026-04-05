@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+/* ─── DESIGN SYSTEM TOKENS ──────────────────────────────────────── */
+@theme {
+  /* Core palette */
+  --color-fire:        #8B0000;
+  --color-fire-mid:   #a80000;
+  --color-fire-bright: #cc0000;
+  --color-pitch:       #0A0A0A;
+  --color-carbon:      #111111;
+  --color-iron:        #1a1a1a;
+  --color-chrome:      #9ca3af;
+  --color-chrome-light:#d1d5db;
+  --color-ember:       #ff4500;
+  --color-gold:        #c8972a;
+
+  /* Typography */
+  --font-display: var(--font-oswald), "Arial Narrow", system-ui, sans-serif;
+  --font-body:    var(--font-inter), system-ui, sans-serif;
+
+  /* Spacing rhythm */
+  --spacing-section: 4.5rem;
+}
+
+/* ─── BASE RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: #0A0A0A;
+  color: #e5e7eb;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ─── CONTAINER ──────────────────────────────────────────────────── */
+.wrap {
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+@media (min-width: 640px)  { .wrap { padding-left: 2.5rem;  padding-right: 2.5rem; } }
+@media (min-width: 1024px) { .wrap { padding-left: 4rem;    padding-right: 4rem; } }
+@media (min-width: 1440px) { .wrap { padding-left: 5rem;    padding-right: 5rem; } }
+
+/* ─── TYPOGRAPHY HELPERS ─────────────────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #8B0000;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 2rem;
+  height: 1.5px;
+  background: #8B0000;
+}
+
+.heading-xl {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.heading-lg {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* ─── RED ACCENT ELEMENTS ────────────────────────────────────────── */
+.rule-red {
+  display: block;
+  width: 3rem;
+  height: 3px;
+  background: #8B0000;
+}
+
+.border-l-fire { border-left: 3px solid #8B0000; }
+
+/* ─── PANELS (horizontal apparatus-style) ───────────────────────── */
+.panel {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.75rem 2rem;
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid #8B0000;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.panel:hover {
+  background: #161616;
+  border-left-color: #cc0000;
+}
+
+/* ─── BUTTONS ────────────────────────────────────────────────────── */
+.btn-fire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2.25rem;
+  background: #8B0000;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid #8B0000;
+  transition: background 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+.btn-fire:hover { background: #a80000; border-color: #a80000; }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2.25rem;
+  background: transparent;
+  color: #e5e7eb;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: border-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+.btn-outline:hover { border-color: #8B0000; color: #ffffff; }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0A0A0A; }
+::-webkit-scrollbar-thumb { background: #8B0000; }
+
+::selection { background: rgba(139,0,0,0.4); color: #fff; }
+
+/* ─── ANIMATIONS ─────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up   { animation: fadeUp 0.7s ease forwards; }
+.fade-up-1 { animation: fadeUp 0.7s 0.1s ease forwards; opacity: 0; }
+.fade-up-2 { animation: fadeUp 0.7s 0.2s ease forwards; opacity: 0; }
+.fade-up-3 { animation: fadeUp 0.7s 0.35s ease forwards; opacity: 0; }
+.fade-up-4 { animation: fadeUp 0.7s 0.5s ease forwards; opacity: 0; }
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+.pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+/* ─── HOVER INTERACTIONS (server-component safe) ────────────────── */
+.community-card {
+  background: #111111;
+  transition: background 0.2s ease;
+}
+.community-card:hover { background: #161616; }
+
+.footer-link {
+  color: #4b5563;
+  transition: color 0.15s ease;
+}
+.footer-link:hover { color: #ffffff; }
+
+/* ─── HERO GRADIENT OVERLAY ──────────────────────────────────────── */
+.hero-overlay {
+  background:
+    linear-gradient(to top,  #0A0A0A 0%, rgba(10,10,10,0.7) 40%, rgba(10,10,10,0.3) 75%, rgba(10,10,10,0.55) 100%),
+    linear-gradient(to right, rgba(10,10,10,0.6) 0%, transparent 60%);
+}
