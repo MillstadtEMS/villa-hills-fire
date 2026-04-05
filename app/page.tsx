@@ -457,7 +457,7 @@ export default function Home() {
             >
               Our department runs on community support. Every dollar goes directly to
               equipment, training, and the operational needs that keep your neighbors
-              safe — every shift, every call.
+              safe.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
