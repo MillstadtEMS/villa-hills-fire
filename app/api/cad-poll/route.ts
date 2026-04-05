@@ -55,6 +55,7 @@ export async function GET(req: Request) {
     const messages: { subject: string; text: string; date: Date }[] = [];
 
     for await (const msg of client.fetch("1:*", { envelope: true, source: true })) {
+      if (!msg.source) continue;
       const parsed = await simpleParser(msg.source);
       messages.push({
         subject: parsed.subject ?? "",
