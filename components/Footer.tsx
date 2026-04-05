@@ -59,7 +59,16 @@ export default function Footer() {
             100% volunteer. ISO Class 4. Protecting Villa Hills and the unincorporated areas
             of St. Clair County since 1955.
           </p>
-          <div className="w-8 h-px" style={{ background: "#8B0000" }} />
+          <div className="w-8 h-px mb-6" style={{ background: "#8B0000" }} />
+          <a
+            href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-fire text-xs px-5 py-3"
+            style={{ fontFamily: "var(--font-display)", letterSpacing: "0.12em" }}
+          >
+            Donate Now
+          </a>
         </div>
 
         {/* NAV */}

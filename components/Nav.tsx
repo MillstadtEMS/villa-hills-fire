@@ -102,13 +102,15 @@ export default function Nav() {
               </Link>
             );
           })}
-          <Link
-            href="/fundraising"
+          <a
+            href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-fire text-xs px-4 py-2"
             style={{ fontFamily: "var(--font-display)", letterSpacing: "0.12em" }}
           >
-            Donate
-          </Link>
+            Donate Now
+          </a>
         </nav>
 
         {/* MOBILE HAMBURGER */}
@@ -161,9 +163,14 @@ export default function Nav() {
             );
           })}
           <div className="pt-4">
-            <Link href="/fundraising" className="btn-fire w-full text-center text-sm">
-              Support the Department
-            </Link>
+            <a
+              href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-fire w-full text-center text-sm"
+            >
+              Donate Now
+            </a>
           </div>
         </nav>
       </div>

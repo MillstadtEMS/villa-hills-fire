@@ -105,13 +105,20 @@ body {
 /* ─── PANELS (horizontal apparatus-style) ───────────────────────── */
 .panel {
   display: flex;
-  align-items: center;
-  gap: 2rem;
-  padding: 1.75rem 2rem;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1rem;
   background: #111111;
   border: 1px solid rgba(255,255,255,0.06);
   border-left: 3px solid #8B0000;
   transition: background 0.2s ease, border-color 0.2s ease;
+}
+@media (min-width: 640px) {
+  .panel {
+    align-items: center;
+    gap: 2rem;
+    padding: 1.75rem 2rem;
+  }
 }
 .panel:hover {
   background: #161616;
@@ -124,6 +131,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 48px;
   padding: 0.9rem 2.25rem;
   background: #8B0000;
   color: #ffffff;
@@ -135,6 +143,8 @@ body {
   border: 2px solid #8B0000;
   transition: background 0.2s ease, color 0.2s ease;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-fire:hover { background: #a80000; border-color: #a80000; }
 
@@ -143,6 +153,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  min-height: 48px;
   padding: 0.9rem 2.25rem;
   background: transparent;
   color: #e5e7eb;
@@ -154,6 +165,8 @@ body {
   border: 2px solid rgba(255,255,255,0.2);
   transition: border-color 0.2s ease, color 0.2s ease;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-outline:hover { border-color: #8B0000; color: #ffffff; }
 
@@ -203,8 +216,26 @@ body {
 .footer-link {
   color: #4b5563;
   transition: color 0.15s ease;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .footer-link:hover { color: #ffffff; }
+
+/* ─── MOBILE UTILITIES ───────────────────────────────────────────── */
+@media (max-width: 639px) {
+  :root { --spacing-section: 3rem; }
+
+  .heading-lg {
+    font-size: clamp(2rem, 10vw, 3rem);
+  }
+
+  .heading-xl {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+}
 
 /* ─── HERO GRADIENT OVERLAY ──────────────────────────────────────── */
 .hero-overlay {

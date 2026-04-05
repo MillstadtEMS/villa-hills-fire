@@ -146,12 +146,12 @@ export default function AboutPage() {
         }}
       >
         <div className="wrap flex flex-col items-center text-center">
-          <div className="relative shrink-0" style={{ width: "672px", height: "672px", marginBottom: "-180px" }}>
+          <div className="relative shrink-0" style={{ width: "min(672px, 90vw)", height: "min(672px, 90vw)", marginBottom: "clamp(-60px, -15vw, -180px)" }}>
             <Image
               src="/images/badge.png"
               alt="Villa Hills Fire Department Badge"
               fill
-              sizes="672px"
+              sizes="(max-width: 768px) 90vw, 672px"
               className="object-contain"
             />
           </div>

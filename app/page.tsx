@@ -29,7 +29,7 @@ export default function Home() {
         {/* Content */}
         <div
           className="relative z-10 wrap"
-          style={{ paddingTop: "calc(2.5rem + 3.5rem + 4rem)", paddingBottom: "10rem" }}
+          style={{ paddingTop: "calc(2.5rem + 3.5rem + clamp(2rem, 6vw, 4rem))", paddingBottom: "clamp(6rem, 12vw, 10rem)" }}
         >
           {/* Eyebrow */}
           <div className="flex items-center gap-3 mb-8 fade-up">
@@ -248,22 +248,22 @@ export default function Home() {
           }}
         />
 
-        <div className="relative z-10" style={{ maxWidth: "1600px", margin: "0 auto", padding: "0 2rem" }}>
-          <div className="flex flex-col md:flex-row items-center" style={{ gap: "0" }}>
+        <div className="relative z-10 wrap">
+          <div className="flex flex-col md:flex-row items-center gap-0">
 
             {/* 70 Years artwork */}
-            <div className="relative shrink-0" style={{ width: "820px", height: "820px", marginLeft: "-120px" }}>
+            <div className="relative shrink-0 w-full md:w-auto" style={{ height: "min(80vw, 500px)", width: "min(80vw, 500px)", marginLeft: "clamp(-2rem, -5vw, -120px)" }}>
               <Image
                 src="/images/70th-anniversary.png"
                 alt="Villa Hills Fire Department 70th Anniversary"
                 fill
-                sizes="820px"
+                sizes="(max-width: 768px) 80vw, 500px"
                 className="object-contain"
               />
             </div>
 
             {/* Text */}
-            <div className="text-center md:text-left" style={{ marginLeft: "2rem" }}>
+            <div className="text-center md:text-left pb-8 md:pb-0" style={{ marginLeft: "clamp(0rem, 2vw, 2rem)" }}>
               <p className="section-label mb-4 justify-center md:justify-start">Milestone</p>
               <h2
                 className="font-display text-white uppercase mb-4"
@@ -454,20 +454,22 @@ export default function Home() {
               safe — every shift, every call.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/fundraising"
+              <a
+                href="https://www.paypal.com/ncp/payment/NGKV77KLSMDH4"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#8B0000] font-bold tracking-wider uppercase text-sm transition-opacity hover:opacity-90"
-                style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}
+                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", minHeight: "48px" }}
               >
-                Support Villa Hills
+                Donate Now
                 <svg viewBox="0 0 20 20" className="w-4 h-4 fill-current">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-              </Link>
+              </a>
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold tracking-wider uppercase text-sm border border-white/30 hover:border-white/70 transition-colors"
-                style={{ fontFamily: "var(--font-display)", fontSize: "1rem" }}
+                style={{ fontFamily: "var(--font-display)", fontSize: "1rem", minHeight: "48px" }}
               >
                 Learn How It Helps
               </Link>
