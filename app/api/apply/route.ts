@@ -35,7 +35,7 @@ async function buildPDF(data: Record<string, string>): Promise<Uint8Array> {
       x: MARGIN, y: 771, size: 9, font: boldFont, color: rgb(1, 1, 1),
     });
     page.drawText("VOLUNTEER FIREFIGHTER APPLICATION — CONFIDENTIAL", {
-      x: W - MARGIN - 240, y: 771, size: 9, font, color: rgb(1, 1, 1, 0.7),
+      x: W - MARGIN - 240, y: 771, size: 9, font, color: rgb(1, 1, 1),
     });
   }
 
