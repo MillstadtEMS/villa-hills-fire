@@ -6,12 +6,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
-  { href: "/",            label: "Home" },
   { href: "/about",       label: "About" },
   { href: "/apparatus",   label: "Apparatus" },
   { href: "/members",     label: "Membership" },
   { href: "/fundraising", label: "Fundraising" },
-  { href: "/join",        label: "Join the Team" },
+  { href: "/join",        label: "Join" },
 ] as const;
 
 export default function Nav() {
@@ -72,7 +71,7 @@ export default function Nav() {
           </Link>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-7">
             {NAV_LINKS.map(({ href, label }) => {
               const active = pathname === href;
               return (
