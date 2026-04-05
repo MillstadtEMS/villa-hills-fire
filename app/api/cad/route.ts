@@ -14,12 +14,9 @@ export async function GET() {
   const sql = neon(dbUrl);
 
   try {
-    const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-
     const rows = await sql`
       SELECT call_type, location, units, received_at
       FROM incidents
-      WHERE received_at > ${cutoff}
       ORDER BY received_at DESC
       LIMIT 1
     `;

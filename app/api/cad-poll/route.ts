@@ -54,7 +54,13 @@ export async function GET(req: Request) {
     // Fetch last 10 messages
     const messages: { subject: string; text: string; date: Date }[] = [];
 
-    for await (const msg of client.fetch("1:*", { envelope: true, source: true })) {
+    // Only fetch the 5 most recent messages by UID
+    const status = await client.status("INBOX", { messages: true });
+    const total = status.messages ?? 0;
+    const start = Math.max(1, total - 4);
+    const range = `${start}:${total}`;
+
+    for await (const msg of client.fetch(range, { envelope: true, source: true })) {
       if (!msg.source) continue;
       const parsed = await simpleParser(msg.source);
       messages.push({
@@ -70,10 +76,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ stored: 0 });
     }
 
-    // Sort newest first, only process emails from last 2 hours
+    // Sort newest first
     messages.sort((a, b) => b.date.getTime() - a.date.getTime());
-    const cutoff = Date.now() - 2 * 60 * 60 * 1000;
-    const recent = messages.filter((m) => m.date.getTime() > cutoff);
+    const recent = messages.slice(0, 5);
 
     let stored = 0;
     for (const msg of recent) {
