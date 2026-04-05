@@ -44,13 +44,13 @@ export default function Nav() {
         <div className="wrap h-full flex items-center gap-8">
 
           {/* LOGO */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="relative w-[70px] h-[70px]">
+          <Link href="/" className="flex items-center gap-3 shrink-0 group absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:translate-x-0">
+            <div className="relative w-[80px] h-[80px] md:w-[70px] md:h-[70px]">
               <Image
                 src="/images/badge.png"
                 alt="Villa Hills Fire Department Badge"
                 fill
-                sizes="70px"
+                sizes="80px"
                 className="object-contain"
               />
             </div>

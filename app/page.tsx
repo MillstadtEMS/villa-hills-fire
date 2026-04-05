@@ -271,7 +271,7 @@ export default function Home() {
 
             {/* Text */}
             <div className="text-center md:text-left pb-6 md:pb-0" style={{ marginLeft: "clamp(0rem, 2vw, 2rem)" }}>
-              <p className="section-label mb-4 justify-center md:justify-start">Milestone</p>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "#8B0000", textAlign: "center", marginBottom: "1rem" }}>Milestone</p>
               <h2
                 className="font-display text-white uppercase mb-4"
                 style={{
