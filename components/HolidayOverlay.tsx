@@ -157,8 +157,6 @@ export default function HolidayOverlay() {
   useEffect(() => {
     const h = getHoliday(new Date());
     if (!h) return;
-    const key = `vhfd-holiday-${h.name}-${new Date().toDateString()}`;
-    if (sessionStorage.getItem(key)) return;
     setHoliday(h);
   }, []);
 
@@ -196,9 +194,6 @@ export default function HolidayOverlay() {
       const elapsed = now - start;
       if (elapsed >= DURATION) {
         cancelAnimationFrame(animRef.current);
-        // save + hide
-        const key = `vhfd-holiday-${holiday!.name}-${new Date().toDateString()}`;
-        sessionStorage.setItem(key, "1");
         setVisible(false);
         return;
       }
