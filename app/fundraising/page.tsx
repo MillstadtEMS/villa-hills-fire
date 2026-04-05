@@ -266,7 +266,6 @@ export default function FundraisingPage() {
               You will be redirected to PayPal to complete your donation securely.
             </p>
           </div>
-          </div>
 
           <Link href="/about" className="btn-outline">
             Contact the Department
