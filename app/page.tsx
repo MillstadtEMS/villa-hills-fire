@@ -257,7 +257,6 @@ export default function Home() {
               style={{
                 height: "min(70vw, 420px)",
                 width: "min(70vw, 420px)",
-                marginLeft: "clamp(-1rem, -3vw, -80px)",
               }}
             >
               <Image
