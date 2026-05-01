@@ -200,11 +200,23 @@ export default function ApplicationsPage() {
             <div className="space-y-6">
               {/* Application Info */}
               <div className="bg-[#111] border border-white/8 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
                   <h2 className="text-white font-black text-lg">{selectedApp.firstName} {selectedApp.lastName}</h2>
-                  <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded border ${statusColors[selectedApp.status]}`}>
-                    {selectedApp.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`/api/admin/applications/${selectedApp.id}/pdf`}
+                      target="_blank"
+                      rel="noopener"
+                      className="flex items-center gap-2 bg-[#8B0000]/15 hover:bg-[#8B0000]/25 border border-[#8B0000]/30 text-[#dc2626] font-black text-xs px-3 py-1.5 rounded-xl transition-colors"
+                      title="Open the application as a PDF"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                      View PDF
+                    </a>
+                    <span className={`text-xs font-black uppercase tracking-widest px-3 py-1 rounded border ${statusColors[selectedApp.status]}`}>
+                      {selectedApp.status}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
