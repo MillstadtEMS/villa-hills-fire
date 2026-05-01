@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { saveApplication } from "@/lib/applications/db";
 
 // ─── PDF Builder ─────────────────────────────────────────────────────────────
 
@@ -169,6 +170,15 @@ export async function POST(req: NextRequest) {
   // Basic server-side validation
   if (!data.firstName || !data.lastName || !data.email || !data.signature) {
     return NextResponse.json({ error: "Required fields are missing." }, { status: 400 });
+  }
+
+  // Save to database
+  let application;
+  try {
+    application = await saveApplication(data);
+  } catch (err) {
+    console.error("Database save failed:", err);
+    return NextResponse.json({ error: "Failed to save application." }, { status: 500 });
   }
 
   // Build PDF

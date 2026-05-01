@@ -13,3 +13,5 @@
 .DS_Store
 *.pem
 /coverage
+.vercel
+tsconfig.tsbuildinfo

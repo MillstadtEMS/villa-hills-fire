@@ -3,7 +3,7 @@ import { Oswald, Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import StatusBar from "@/components/StatusBar";
+import CallTicker from "@/components/CallTicker";
 import FireTruckAnimation from "@/components/FireTruckAnimation";
 import HolidayOverlay from "@/components/HolidayOverlay";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
@@ -52,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${oswald.variable} ${inter.variable}`}>
       <body className="bg-[#0A0A0A] text-gray-200 antialiased overflow-x-hidden">
-        <StatusBar />
+        <CallTicker />
         <Nav />
         <main style={{ paddingTop: "calc(2.5rem + 3.5rem)" }}>
           {children}
