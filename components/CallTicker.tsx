@@ -83,6 +83,10 @@ export default function CallTicker() {
 
   const currentYear = now.getFullYear();
   const lastCall    = loading ? null : (latest[0] ?? null);
+  const ACTIVE_WINDOW_MS = 2 * 60 * 60 * 1000;
+  const isActive = lastCall
+    ? (now.getTime() - new Date(lastCall.dispatchDatetime).getTime()) < ACTIVE_WINDOW_MS
+    : false;
 
   return (
     <div ref={wrapperRef} className="fixed top-0 left-0 right-0" style={{ zIndex: 60 }}>
@@ -137,11 +141,21 @@ export default function CallTicker() {
           {/* -- Status dot + label -- */}
           <div className="shrink-0 flex items-center gap-1.5">
             <span className="relative flex w-2 h-2">
-              <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${lastCall ? "bg-red-500" : "bg-green-500"}`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${lastCall ? "bg-red-500" : "bg-green-500"}`} />
+              {isActive && (
+                <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-red-500" />
+              )}
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${
+                  isActive ? "bg-red-500" : lastCall ? "bg-red-900" : "bg-green-500"
+                }`}
+              />
             </span>
-            <span className={`text-[10px] font-black tracking-wider uppercase whitespace-nowrap ${lastCall ? "text-red-400" : "text-green-600"}`}>
-              {lastCall ? "Last Call" : "In Service"}
+            <span
+              className={`text-[10px] font-black tracking-wider uppercase whitespace-nowrap ${
+                isActive ? "text-red-400" : lastCall ? "text-gray-500" : "text-green-600"
+              }`}
+            >
+              {isActive ? "Active Call" : lastCall ? "Last Call" : "In Service"}
             </span>
           </div>
 
@@ -156,7 +170,7 @@ export default function CallTicker() {
                   {shortDate(lastCall.dispatchDate)} {lastCall.dispatchTime}
                 </span>
                 <span className="text-white/20 shrink-0">&middot;</span>
-                <span className="text-red-400 font-bold text-[11px] truncate">{lastCall.dispatchNature}</span>
+                <span className={`font-bold text-[11px] truncate ${isActive ? "text-red-400" : "text-gray-400"}`}>{lastCall.dispatchNature}</span>
               </div>
             ) : (
               <span className="text-gray-600 text-[10px]">No active incidents.</span>
