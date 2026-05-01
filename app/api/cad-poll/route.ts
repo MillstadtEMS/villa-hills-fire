@@ -57,7 +57,8 @@ export async function GET(req: Request) {
       const fromAddr = Array.isArray(parsed.from?.value)
         ? parsed.from.value.map((a: { address?: string }) => a.address ?? "").join(",")
         : "";
-      const subject = (parsed.subject ?? "").trim();
+      const subjectRaw = (parsed.subject ?? "").trim();
+      const subject = subjectRaw.replace(/^(?:(?:fwd?|re|fw):\s*)+/i, "").trim();
       const bodyText = String(parsed.text ?? "");
 
       const fromLower = fromAddr.toLowerCase();

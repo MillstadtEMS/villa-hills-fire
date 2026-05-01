@@ -79,8 +79,10 @@ export async function GET(req: Request) {
         const cadBodyRe = /\[\d+\s+Fire\s+CAD\]\s+(.+?)\s+--\s+(.+?)\s+--\s+Box:\s+.+?\s+--\s+Units:\s+(.+)/i;
         const bodyText = String(parsed.text ?? "");
 
-        const fromMatch = fromAddr.toLowerCase() === "alert@cfmsg.co";
-        const subjectFormatMatch = subject.trim() === "Chief Alert";
+        const fromLower = fromAddr.toLowerCase();
+        const fromMatch = fromLower === "alert@cfmsg.co" || fromLower === user.toLowerCase();
+        const cleanedSubject = subject.trim().replace(/^(?:(?:fwd?|re|fw):\s*)+/i, "").trim();
+        const subjectFormatMatch = cleanedSubject === "Chief Alert";
         const bodyMatch = bodyText.match(cadBodyRe);
         const cadKeywordMatch = !!bodyMatch && /\bVLHL\b/i.test(bodyMatch[3]);
         const isCadAlert = fromMatch && subjectFormatMatch && cadKeywordMatch;
