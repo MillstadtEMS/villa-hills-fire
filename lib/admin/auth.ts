@@ -48,7 +48,11 @@ export async function getSession(): Promise<{ userId: string; role: string } | n
 
 export async function isSuperuser(): Promise<boolean> {
   const session = await getSession();
-  return session?.role === "superuser";
+  if (!session) return false;
+  // Re-check the DB so role changes take effect without a re-login.
+  const { getUserById } = await import("./users");
+  const user = await getUserById(session.userId);
+  return user?.role === "superuser";
 }
 
 export function sessionCookieOptions(token: string) {
