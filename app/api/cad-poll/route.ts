@@ -60,7 +60,8 @@ export async function GET(req: Request) {
       const subject = (parsed.subject ?? "").trim();
       const bodyText = String(parsed.text ?? "");
 
-      const fromOk = fromAddr.toLowerCase() === "alert@cfmsg.co";
+      const fromLower = fromAddr.toLowerCase();
+      const fromOk = fromLower === "alert@cfmsg.co" || fromLower === user.toLowerCase();
       const subjectOk = subject === "Chief Alert";
       const bodyMatch = bodyText.match(cadBodyRe);
       const unitsOk = bodyMatch ? /\bVLHL\b/i.test(bodyMatch[3]) : false;

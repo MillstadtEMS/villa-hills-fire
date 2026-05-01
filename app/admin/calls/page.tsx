@@ -147,17 +147,20 @@ export default function CallsAdmin() {
 
   async function sendTestAlert() {
     if (sendingTest) return;
-    if (!confirm("Fire a TEST DISPATCH alert dated right now? It will appear as ACTIVE CALL on the ticker for 2 hours. You can delete it from this page anytime.")) return;
+    if (!confirm("Send a real test email to the CAD inbox? This proves the entire pipeline: SMTP → Gmail → IMAP → filter → DB → ticker. It will appear as ACTIVE CALL within seconds. You can delete it from this page after.")) return;
     setSendingTest(true);
-    await fetch("/api/admin/calls", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        dispatchDate: todayLocal(),
-        dispatchTime: nowTimeLocal(),
-        dispatchNature: "TEST DISPATCH",
-      }),
-    });
+    try {
+      const r = await fetch("/api/admin/calls/test-email", { method: "POST" });
+      const data = await r.json();
+      if (!r.ok) {
+        alert("Test failed: " + (data.error ?? "unknown") + (data.detail ? "\n\n" + data.detail : ""));
+      } else {
+        const polled = data.pollResult?.stored ?? "?";
+        alert(`Test email sent. Cron poll: stored ${polled} new call(s). Reload the ticker.`);
+      }
+    } catch (e) {
+      alert("Test failed: " + String(e));
+    }
     setSendingTest(false);
     await load();
   }
