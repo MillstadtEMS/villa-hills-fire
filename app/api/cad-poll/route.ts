@@ -56,14 +56,30 @@ export async function GET(req: Request) {
     secure: true,
     auth: { user, pass },
     logger: false,
+    // Bound how long any single IMAP operation can hang. Without these,
+    // a flaky Vercel<->Gmail connection can wedge the function for 5min.
+    socketTimeout: 15_000,
   });
+
+  // Helper: bound any await with a timeout so a hung IMAP op fails fast.
+  async function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        p,
+        new Promise<T>((_, rej) => { timer = setTimeout(() => rej(new Error(`${label} timed out after ${ms}ms`)), ms); }),
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
 
   // Track every UID we look at so we mark them \Seen at the end in one shot.
   const uidsTouched: number[] = [];
 
   try {
-    await client.connect();
-    await client.mailboxOpen("INBOX");
+    await withTimeout(client.connect(), 10_000, "IMAP connect");
+    await withTimeout(client.mailboxOpen("INBOX"), 10_000, "IMAP open INBOX");
 
     try {
       const status = await client.status("INBOX", { messages: true });
