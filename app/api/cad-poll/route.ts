@@ -5,8 +5,24 @@ import { isDuplicate, saveCall, logPollRun } from "@/lib/cad/db";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const runtime = "nodejs";
 
-// Called by cron-job.org every minute
+// Mirrors millstadt-ems's CAD poll logic, but over IMAP since the Villa Hills
+// account isn't on Gmail OAuth yet:
+//   - Only fetch UNREAD messages (analogous to Gmail's `is:unread` filter).
+//   - For each unread message, run the strict CAD filter.
+//   - Mark every message as read after we look at it, so the next poll only
+//     ever sees brand-new emails — no "last 40 by sequence number" guessing.
+// This makes the pipeline self-clearing: a real CAD email arrives → next
+// minute's cron sees it as unread → ingests it → marks read → done.
+
+const CAD_BODY_RE =
+  /\[\d+\s+Fire\s+CAD\]\s+(.+?)\s+--\s+(.+?)\s+--\s+Box:\s+.+?\s+--\s+Units:\s+(.+)/i;
+
+function stripSubjectPrefixes(s: string): string {
+  return s.replace(/^(?:(?:fwd?|re|fw):\s*)+/i, "").trim();
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
@@ -14,17 +30,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = process.env.GMAIL_CAD_USER
-    ?? process.env.GMAIL_USER
-    ?? process.env.GMAIL_EMAIL;
-  const pass = process.env.GMAIL_CAD_APP_PASSWORD
-    ?? process.env.GMAIL_CAD_PASSWORD
-    ?? process.env.GMAIL_PASSWORD;
+  const user = process.env.GMAIL_CAD_USER ?? process.env.GMAIL_USER ?? process.env.GMAIL_EMAIL;
+  const pass = process.env.GMAIL_CAD_APP_PASSWORD ?? process.env.GMAIL_CAD_PASSWORD ?? process.env.GMAIL_PASSWORD;
   const dbUrl = process.env.DATABASE_URL;
-
   if (!user || !pass || !dbUrl) {
     return NextResponse.json({ error: "Missing credentials" }, { status: 500 });
   }
+
+  const startedAt = Date.now();
+  const results = {
+    inboxTotal: 0,
+    unreadCount: 0,
+    matched: 0,
+    stored: 0,
+    duplicates: 0,
+    skipped: 0,
+    errors: [] as string[],
+  };
 
   const client = new ImapFlow({
     host: "imap.gmail.com",
@@ -34,103 +56,130 @@ export async function GET(req: Request) {
     logger: false,
   });
 
-  const startedAt = Date.now();
-  let inboxTotal = 0;
-  let matched = 0;
-  let storedCount = 0;
-
   try {
     await client.connect();
-    await client.mailboxOpen("INBOX");
+    const lock = await client.getMailboxLock("INBOX");
 
-    const messages: { subject: string; text: string; html: string; date: Date; from: string; id: string }[] = [];
+    try {
+      // -- mailbox total (just for diagnostics) --
+      try {
+        const status = await client.status("INBOX", { messages: true });
+        results.inboxTotal = status.messages ?? 0;
+      } catch {
+        // ignore
+      }
 
-    const status = await client.status("INBOX", { messages: true });
-    const total = status.messages ?? 0;
-    inboxTotal = total;
-    const maxMessages = 40;
-    const start = Math.max(1, total - maxMessages + 1);
-    const range = `${start}:${total}`;
+      // -- find UNSEEN messages only --
+      const unseenUids = (await client.search({ seen: false }, { uid: true })) || [];
+      results.unreadCount = Array.isArray(unseenUids) ? unseenUids.length : 0;
 
-    // Strict CAD body format from Chief 360:
-    //   [NN Fire CAD] CALL TYPE -- ADDRESS CITY, ST ZIP -- Box: ... -- Units: ...
-    // Must include a Villa Hills unit (VLHL) so we don't ingest unrelated mutual-aid alerts.
-    const cadBodyRe = /\[\d+\s+Fire\s+CAD\]\s+(.+?)\s+--\s+(.+?)\s+--\s+Box:\s+.+?\s+--\s+Units:\s+(.+)/i;
+      if (results.unreadCount === 0) {
+        await logPollRun({
+          checked: 0,
+          stored: 0,
+          inboxTotal: results.inboxTotal,
+          durationMs: Date.now() - startedAt,
+        });
+        return NextResponse.json({ ok: true, ...results });
+      }
 
-    for await (const msg of client.fetch(range, { envelope: true, source: true })) {
-      if (!msg.source) continue;
-      const parsed = await simpleParser(msg.source);
-      const fromAddr = Array.isArray(parsed.from?.value)
-        ? parsed.from.value.map((a: { address?: string }) => a.address ?? "").join(",")
-        : "";
-      const subjectRaw = (parsed.subject ?? "").trim();
-      const subject = subjectRaw.replace(/^(?:(?:fwd?|re|fw):\s*)+/i, "").trim();
-      const bodyText = String(parsed.text ?? "");
+      // -- fetch each unseen message, parse, decide --
+      for await (const msg of client.fetch(unseenUids as number[], { envelope: true, source: true }, { uid: true })) {
+        if (!msg.source || typeof msg.uid !== "number") continue;
+        const uid = msg.uid;
 
-      const fromLower = fromAddr.toLowerCase();
-      const fromOk = fromLower === "alert@cfmsg.co" || fromLower === user.toLowerCase();
-      const subjectOk = subject === "Chief Alert";
-      const bodyMatch = bodyText.match(cadBodyRe);
-      const unitsOk = bodyMatch ? /\bVLHL\b/i.test(bodyMatch[3]) : false;
-      if (!fromOk || !subjectOk || !bodyMatch || !unitsOk) continue;
+        try {
+          const parsed = await simpleParser(msg.source);
+          const fromAddr = Array.isArray(parsed.from?.value)
+            ? parsed.from.value.map((a: { address?: string }) => (a.address ?? "").toLowerCase()).join(",")
+            : "";
+          const subject = stripSubjectPrefixes(parsed.subject ?? "");
+          const bodyText = String(parsed.text ?? "");
 
-      const stableMessageId = parsed.messageId
-        ?? (typeof msg.uid === "number" ? `imap-${msg.uid}` : `imap-${msg.seq}`);
+          const fromOk =
+            fromAddr.includes("alert@cfmsg.co") || fromAddr.includes(user.toLowerCase());
+          const subjectOk = subject === "Chief Alert";
+          const bodyMatch = bodyText.match(CAD_BODY_RE);
+          const unitsOk = bodyMatch ? /\bVLHL\b/i.test(bodyMatch[3]) : false;
 
-      messages.push({
-        subject,
-        text: bodyText,
-        html: typeof parsed.html === "string" ? parsed.html : "",
-        date: parsed.date ?? new Date(0),
-        from: fromAddr,
-        id: stableMessageId,
-      });
+          if (!(fromOk && subjectOk && bodyMatch && unitsOk)) {
+            results.skipped++;
+            // Still mark as read so we don't re-evaluate it forever.
+            await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
+            continue;
+          }
+
+          results.matched++;
+
+          const stableMessageId =
+            parsed.messageId ?? `imap-${uid}`;
+
+          if (await isDuplicate(stableMessageId)) {
+            results.duplicates++;
+            await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
+            continue;
+          }
+
+          const callType = bodyMatch[1].trim();
+          const dateObj = parsed.date ?? new Date();
+          // Build Chicago-local date/time for display fields.
+          const chicagoStr = dateObj.toLocaleString("en-US", {
+            timeZone: "America/Chicago",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+          // chicagoStr looks like "05/03/2026, 12:15"
+          const m = chicagoStr.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s+(\d{2}):(\d{2})/);
+          const dispatchDate = m ? `${m[1]}/${m[2]}/${m[3]}` : dateObj.toLocaleDateString("en-US");
+          const dispatchTime = m ? `${m[4]}:${m[5]}` : dateObj.toLocaleTimeString("en-US");
+          const sourceYear = m ? Number(m[3]) : new Date().getFullYear();
+
+          await saveCall({
+            gmailMessageId: stableMessageId,
+            dispatchDatetime: dateObj.toISOString(),
+            dispatchDate,
+            dispatchTime,
+            dispatchNature: callType,
+            sourceYear,
+          });
+          results.stored++;
+
+          await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
+        } catch (innerErr) {
+          results.errors.push(`uid ${uid}: ${String(innerErr).slice(0, 200)}`);
+          // mark seen so a poison-pill email can't permanently block future polls
+          await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
+        }
+      }
+    } finally {
+      lock.release();
     }
 
     await client.logout();
-    matched = messages.length;
 
-    if (messages.length === 0) {
-      await logPollRun({ checked: 0, stored: 0, inboxTotal, durationMs: Date.now() - startedAt });
-      return NextResponse.json({ stored: 0, inboxTotal });
-    }
+    await logPollRun({
+      checked: results.matched,
+      stored: results.stored,
+      inboxTotal: results.inboxTotal,
+      durationMs: Date.now() - startedAt,
+      error: results.errors.length ? results.errors.join("; ").slice(0, 500) : undefined,
+    });
 
-    // Sort newest first
-    messages.sort((a, b) => b.date.getTime() - a.date.getTime());
-    const recent = messages.slice(0, 5);
-
-    let stored = 0;
-    for (const msg of recent) {
-      if (await isDuplicate(msg.id)) continue;
-
-      const bodyMatch = msg.text.match(cadBodyRe);
-      if (!bodyMatch) continue;
-      const callType = bodyMatch[1].trim();
-
-      // Build date/time from email received time (Chicago timezone)
-      const chicago = new Date(msg.date.toLocaleString("en-US", { timeZone: "America/Chicago" }));
-      const dispatchDate = `${String(chicago.getMonth() + 1).padStart(2, "0")}/${String(chicago.getDate()).padStart(2, "0")}/${chicago.getFullYear()}`;
-      const dispatchTime = `${String(chicago.getHours()).padStart(2, "0")}:${String(chicago.getMinutes()).padStart(2, "0")}`;
-      const sourceYear = chicago.getFullYear();
-
-      await saveCall({
-        gmailMessageId: msg.id,
-        dispatchDatetime: msg.date.toISOString(),
-        dispatchDate,
-        dispatchTime,
-        dispatchNature: callType,
-        sourceYear,
-      });
-      stored++;
-    }
-    storedCount = stored;
-
-    await logPollRun({ checked: matched, stored: storedCount, inboxTotal, durationMs: Date.now() - startedAt });
-    return NextResponse.json({ stored, checked: messages.length, inboxTotal });
+    return NextResponse.json({ ok: true, ...results });
   } catch (err) {
-    console.error("CAD poll error:", err);
     try { await client.logout(); } catch {}
-    await logPollRun({ checked: matched, stored: storedCount, inboxTotal, durationMs: Date.now() - startedAt, error: String(err).slice(0, 500) });
-    return NextResponse.json({ error: "Poll failed", detail: String(err).slice(0, 200) }, { status: 500 });
+    const detail = String(err).slice(0, 500);
+    await logPollRun({
+      checked: results.matched,
+      stored: results.stored,
+      inboxTotal: results.inboxTotal,
+      durationMs: Date.now() - startedAt,
+      error: detail,
+    });
+    return NextResponse.json({ error: "Poll failed", detail: detail.slice(0, 200) }, { status: 500 });
   }
 }
