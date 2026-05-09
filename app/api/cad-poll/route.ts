@@ -70,10 +70,17 @@ export async function GET(req: Request) {
       }
 
       // -- find UNSEEN messages only --
-      const unseenUids = (await client.search({ seen: false }, { uid: true })) || [];
-      results.unreadCount = Array.isArray(unseenUids) ? unseenUids.length : 0;
+      const allUnseenUids = (await client.search({ seen: false }, { uid: true })) || [];
+      results.unreadCount = Array.isArray(allUnseenUids) ? allUnseenUids.length : 0;
 
-      if (results.unreadCount === 0) {
+      // Cap per-poll work — on first deploy there may be hundreds of historic
+      // unseen emails. Take the most recent 25 (highest UIDs); the rest get
+      // mopped up on subsequent runs as they age into the top of the queue.
+      const unseenUids = Array.isArray(allUnseenUids)
+        ? [...allUnseenUids].sort((a, b) => b - a).slice(0, 25)
+        : [];
+
+      if (unseenUids.length === 0) {
         await logPollRun({
           checked: 0,
           stored: 0,
