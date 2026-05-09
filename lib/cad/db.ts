@@ -40,6 +40,59 @@ async function ensureSchema() {
       created_at       TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+  await db`
+    CREATE TABLE IF NOT EXISTS cad_poll_log (
+      id          BIGSERIAL PRIMARY KEY,
+      ran_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      checked     INTEGER,
+      stored      INTEGER,
+      inbox_total INTEGER,
+      duration_ms INTEGER,
+      error       TEXT
+    )
+  `;
+}
+
+export async function logPollRun(opts: {
+  checked?: number;
+  stored?: number;
+  inboxTotal?: number;
+  durationMs?: number;
+  error?: string;
+}): Promise<void> {
+  try {
+    await ensureSchema();
+    const db = sql();
+    await db`
+      INSERT INTO cad_poll_log (checked, stored, inbox_total, duration_ms, error)
+      VALUES (${opts.checked ?? null}, ${opts.stored ?? null}, ${opts.inboxTotal ?? null},
+              ${opts.durationMs ?? null}, ${opts.error ?? null})
+    `;
+  } catch {
+    // never let logging break the cron
+  }
+}
+
+export async function getPollHistory(limit = 50): Promise<Array<{
+  ranAt: string; checked: number | null; stored: number | null;
+  inboxTotal: number | null; durationMs: number | null; error: string | null;
+}>> {
+  await ensureSchema();
+  const db = sql();
+  const rows = await db`
+    SELECT ran_at, checked, stored, inbox_total, duration_ms, error
+    FROM cad_poll_log
+    ORDER BY ran_at DESC
+    LIMIT ${limit}
+  `;
+  return (rows as Record<string, unknown>[]).map(r => ({
+    ranAt: r.ran_at instanceof Date ? r.ran_at.toISOString() : String(r.ran_at),
+    checked: r.checked === null ? null : Number(r.checked),
+    stored: r.stored === null ? null : Number(r.stored),
+    inboxTotal: r.inbox_total === null ? null : Number(r.inbox_total),
+    durationMs: r.duration_ms === null ? null : Number(r.duration_ms),
+    error: r.error === null ? null : String(r.error),
+  }));
 }
 
 // -- Helpers --

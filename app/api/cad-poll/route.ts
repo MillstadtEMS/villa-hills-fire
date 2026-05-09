@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
-import { isDuplicate, saveCall } from "@/lib/cad/db";
+import { isDuplicate, saveCall, logPollRun } from "@/lib/cad/db";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -34,6 +34,11 @@ export async function GET(req: Request) {
     logger: false,
   });
 
+  const startedAt = Date.now();
+  let inboxTotal = 0;
+  let matched = 0;
+  let storedCount = 0;
+
   try {
     await client.connect();
     await client.mailboxOpen("INBOX");
@@ -42,6 +47,7 @@ export async function GET(req: Request) {
 
     const status = await client.status("INBOX", { messages: true });
     const total = status.messages ?? 0;
+    inboxTotal = total;
     const maxMessages = 40;
     const start = Math.max(1, total - maxMessages + 1);
     const range = `${start}:${total}`;
@@ -82,9 +88,11 @@ export async function GET(req: Request) {
     }
 
     await client.logout();
+    matched = messages.length;
 
     if (messages.length === 0) {
-      return NextResponse.json({ stored: 0 });
+      await logPollRun({ checked: 0, stored: 0, inboxTotal, durationMs: Date.now() - startedAt });
+      return NextResponse.json({ stored: 0, inboxTotal });
     }
 
     // Sort newest first
@@ -115,11 +123,14 @@ export async function GET(req: Request) {
       });
       stored++;
     }
+    storedCount = stored;
 
-    return NextResponse.json({ stored, checked: messages.length });
+    await logPollRun({ checked: matched, stored: storedCount, inboxTotal, durationMs: Date.now() - startedAt });
+    return NextResponse.json({ stored, checked: messages.length, inboxTotal });
   } catch (err) {
     console.error("CAD poll error:", err);
     try { await client.logout(); } catch {}
-    return NextResponse.json({ error: "Poll failed" }, { status: 500 });
+    await logPollRun({ checked: matched, stored: storedCount, inboxTotal, durationMs: Date.now() - startedAt, error: String(err).slice(0, 500) });
+    return NextResponse.json({ error: "Poll failed", detail: String(err).slice(0, 200) }, { status: 500 });
   }
 }
