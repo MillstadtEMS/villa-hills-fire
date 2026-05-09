@@ -6,15 +6,16 @@ import { isDuplicate, saveCall, logPollRun } from "@/lib/cad/db";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
-// Mirrors millstadt-ems's CAD poll logic, but over IMAP since the Villa Hills
-// account isn't on Gmail OAuth yet:
-//   - Only fetch UNREAD messages (analogous to Gmail's `is:unread` filter).
-//   - For each unread message, run the strict CAD filter.
-//   - Mark every message as read after we look at it, so the next poll only
-//     ever sees brand-new emails — no "last 40 by sequence number" guessing.
-// This makes the pipeline self-clearing: a real CAD email arrives → next
-// minute's cron sees it as unread → ingests it → marks read → done.
+// Mirrors millstadt-ems's CAD poll logic via IMAP:
+//   1. Search for UNSEEN messages only (Gmail's `is:unread` equivalent).
+//   2. Two-stage fetch: cheap envelope first, then full source ONLY for
+//      messages whose subject/from look like real CAD alerts. Avoids
+//      paying parser cost on every newsletter and bot email.
+//   3. Mark every UID we looked at as \Seen at the end (single batch STORE)
+//      so the next poll only ever sees brand-new emails. Self-clearing
+//      queue means a poison-pill message can't permanently block ingest.
 
 const CAD_BODY_RE =
   /\[\d+\s+Fire\s+CAD\]\s+(.+?)\s+--\s+(.+?)\s+--\s+Box:\s+.+?\s+--\s+Units:\s+(.+)/i;
@@ -41,6 +42,7 @@ export async function GET(req: Request) {
   const results = {
     inboxTotal: 0,
     unreadCount: 0,
+    candidates: 0,
     matched: 0,
     stored: 0,
     duplicates: 0,
@@ -56,114 +58,111 @@ export async function GET(req: Request) {
     logger: false,
   });
 
+  // Track every UID we look at so we mark them \Seen at the end in one shot.
+  const uidsTouched: number[] = [];
+
   try {
     await client.connect();
-    const lock = await client.getMailboxLock("INBOX");
+    await client.mailboxOpen("INBOX");
 
     try {
-      // -- mailbox total (just for diagnostics) --
+      const status = await client.status("INBOX", { messages: true });
+      results.inboxTotal = status.messages ?? 0;
+    } catch { /* ignore */ }
+
+    // --- Stage 1: list UNSEEN UIDs ---
+    const allUnseen = (await client.search({ seen: false }, { uid: true })) || [];
+    results.unreadCount = Array.isArray(allUnseen) ? allUnseen.length : 0;
+
+    // Cap per-poll work — process the 25 most recent unseen UIDs.
+    const unseenUids = Array.isArray(allUnseen)
+      ? [...allUnseen].sort((a, b) => b - a).slice(0, 25)
+      : [];
+
+    if (unseenUids.length === 0) {
+      await client.logout();
+      await logPollRun({ checked: 0, stored: 0, inboxTotal: results.inboxTotal, durationMs: Date.now() - startedAt });
+      return NextResponse.json({ ok: true, ...results });
+    }
+
+    // --- Stage 2: cheap envelope-only fetch to triage ---
+    type Candidate = { uid: number; subject: string; fromLower: string };
+    const candidates: Candidate[] = [];
+
+    for await (const msg of client.fetch(unseenUids, { envelope: true }, { uid: true })) {
+      if (typeof msg.uid !== "number") continue;
+      uidsTouched.push(msg.uid);
+
+      const subjectRaw = msg.envelope?.subject ?? "";
+      const subject = stripSubjectPrefixes(subjectRaw);
+      const fromLower = (msg.envelope?.from ?? [])
+        .map(a => (a?.address ?? "").toLowerCase())
+        .join(",");
+
+      if (subject !== "Chief Alert") continue;
+      if (!(fromLower.includes("alert@cfmsg.co") || fromLower.includes(user.toLowerCase()))) continue;
+
+      candidates.push({ uid: msg.uid, subject, fromLower });
+    }
+    results.candidates = candidates.length;
+
+    // --- Stage 3: for each candidate, fetch full source and validate body ---
+    for (const c of candidates) {
       try {
-        const status = await client.status("INBOX", { messages: true });
-        results.inboxTotal = status.messages ?? 0;
-      } catch {
-        // ignore
-      }
-
-      // -- find UNSEEN messages only --
-      const allUnseenUids = (await client.search({ seen: false }, { uid: true })) || [];
-      results.unreadCount = Array.isArray(allUnseenUids) ? allUnseenUids.length : 0;
-
-      // Cap per-poll work — on first deploy there may be hundreds of historic
-      // unseen emails. Take the most recent 25 (highest UIDs); the rest get
-      // mopped up on subsequent runs as they age into the top of the queue.
-      const unseenUids = Array.isArray(allUnseenUids)
-        ? [...allUnseenUids].sort((a, b) => b - a).slice(0, 25)
-        : [];
-
-      if (unseenUids.length === 0) {
-        await logPollRun({
-          checked: 0,
-          stored: 0,
-          inboxTotal: results.inboxTotal,
-          durationMs: Date.now() - startedAt,
-        });
-        return NextResponse.json({ ok: true, ...results });
-      }
-
-      // -- fetch each unseen message, parse, decide --
-      for await (const msg of client.fetch(unseenUids as number[], { envelope: true, source: true }, { uid: true })) {
-        if (!msg.source || typeof msg.uid !== "number") continue;
-        const uid = msg.uid;
-
-        try {
-          const parsed = await simpleParser(msg.source);
-          const fromAddr = Array.isArray(parsed.from?.value)
-            ? parsed.from.value.map((a: { address?: string }) => (a.address ?? "").toLowerCase()).join(",")
-            : "";
-          const subject = stripSubjectPrefixes(parsed.subject ?? "");
-          const bodyText = String(parsed.text ?? "");
-
-          const fromOk =
-            fromAddr.includes("alert@cfmsg.co") || fromAddr.includes(user.toLowerCase());
-          const subjectOk = subject === "Chief Alert";
-          const bodyMatch = bodyText.match(CAD_BODY_RE);
-          const unitsOk = bodyMatch ? /\bVLHL\b/i.test(bodyMatch[3]) : false;
-
-          if (!(fromOk && subjectOk && bodyMatch && unitsOk)) {
-            results.skipped++;
-            // Still mark as read so we don't re-evaluate it forever.
-            await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
-            continue;
-          }
-
-          results.matched++;
-
-          const stableMessageId =
-            parsed.messageId ?? `imap-${uid}`;
-
-          if (await isDuplicate(stableMessageId)) {
-            results.duplicates++;
-            await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
-            continue;
-          }
-
-          const callType = bodyMatch[1].trim();
-          const dateObj = parsed.date ?? new Date();
-          // Build Chicago-local date/time for display fields.
-          const chicagoStr = dateObj.toLocaleString("en-US", {
-            timeZone: "America/Chicago",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          });
-          // chicagoStr looks like "05/03/2026, 12:15"
-          const m = chicagoStr.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s+(\d{2}):(\d{2})/);
-          const dispatchDate = m ? `${m[1]}/${m[2]}/${m[3]}` : dateObj.toLocaleDateString("en-US");
-          const dispatchTime = m ? `${m[4]}:${m[5]}` : dateObj.toLocaleTimeString("en-US");
-          const sourceYear = m ? Number(m[3]) : new Date().getFullYear();
-
-          await saveCall({
-            gmailMessageId: stableMessageId,
-            dispatchDatetime: dateObj.toISOString(),
-            dispatchDate,
-            dispatchTime,
-            dispatchNature: callType,
-            sourceYear,
-          });
-          results.stored++;
-
-          await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
-        } catch (innerErr) {
-          results.errors.push(`uid ${uid}: ${String(innerErr).slice(0, 200)}`);
-          // mark seen so a poison-pill email can't permanently block future polls
-          await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true }).catch(() => {});
+        // Re-open the source for this single UID
+        let source: Buffer | null = null;
+        for await (const m of client.fetch(c.uid, { source: true }, { uid: true })) {
+          if (m.source) source = m.source as Buffer;
         }
+        if (!source) { results.skipped++; continue; }
+
+        const parsed = await simpleParser(source);
+        const bodyText = String(parsed.text ?? "");
+        const bodyMatch = bodyText.match(CAD_BODY_RE);
+        const unitsOk = bodyMatch ? /\bVLHL\b/i.test(bodyMatch[3]) : false;
+
+        if (!bodyMatch || !unitsOk) {
+          results.skipped++;
+          continue;
+        }
+
+        results.matched++;
+        const stableMessageId = parsed.messageId ?? `imap-${c.uid}`;
+
+        if (await isDuplicate(stableMessageId)) {
+          results.duplicates++;
+          continue;
+        }
+
+        const callType = bodyMatch[1].trim();
+        const dateObj = parsed.date ?? new Date();
+        const chicagoStr = dateObj.toLocaleString("en-US", {
+          timeZone: "America/Chicago",
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", hour12: false,
+        });
+        const m = chicagoStr.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s+(\d{2}):(\d{2})/);
+        const dispatchDate = m ? `${m[1]}/${m[2]}/${m[3]}` : dateObj.toLocaleDateString("en-US");
+        const dispatchTime = m ? `${m[4]}:${m[5]}` : dateObj.toLocaleTimeString("en-US");
+        const sourceYear = m ? Number(m[3]) : new Date().getFullYear();
+
+        await saveCall({
+          gmailMessageId: stableMessageId,
+          dispatchDatetime: dateObj.toISOString(),
+          dispatchDate,
+          dispatchTime,
+          dispatchNature: callType,
+          sourceYear,
+        });
+        results.stored++;
+      } catch (innerErr) {
+        results.errors.push(`uid ${c.uid}: ${String(innerErr).slice(0, 200)}`);
       }
-    } finally {
-      lock.release();
+    }
+
+    // --- Stage 4: mark every UID we examined as \Seen (single batch STORE) ---
+    if (uidsTouched.length > 0) {
+      await client.messageFlagsAdd(uidsTouched, ["\\Seen"], { uid: true }).catch(() => {});
     }
 
     await client.logout();
@@ -175,7 +174,6 @@ export async function GET(req: Request) {
       durationMs: Date.now() - startedAt,
       error: results.errors.length ? results.errors.join("; ").slice(0, 500) : undefined,
     });
-
     return NextResponse.json({ ok: true, ...results });
   } catch (err) {
     try { await client.logout(); } catch {}
